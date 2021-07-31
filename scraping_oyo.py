@@ -1,14 +1,19 @@
 import requests
 from bs4 import BeautifulSoup
 import pandas
+import argparse
 import connect
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--page_num_max", help="Enter the number of pages to parse", type=int)
+parser.add_argument("--dbname", help="Enter the database name", type=string)
+args = parser.parse_args()
 
 oyo_url = "https://www.oyorooms.com/hotels-in-bangalore/?page="
-page_num_MAX = 5
+page_num_MAX = args.page_num_max
 scrapped_info_list = []
 
-connect.connect("OYO_HOTELS")
+connect.connect(args.dbname)
 
 for page_num in range(1, page_num_MAX + 1):
     url = oyo_url + str(page_num)
@@ -30,9 +35,9 @@ for page_num in range(1, page_num_MAX + 1):
             hotel_dict["rating"] = None
 
         scrapped_info_list.append(hotel_dict)
-        connect.insert_into_table("OYO_HOTELS", tuple(hotel_dict.values()))
+        connect.insert_into_table(args.dbname, tuple(hotel_dict.values()))
 
 dataFrame = pandas.DataFrame(scrapped_info_list)
 print("Creating csv file...")
 dataFrame.to_csv("Oyo.csv")
-connect.get_hotel_info("OYO_HOTELS")
+connect.get_hotel_info(args.dbname)
